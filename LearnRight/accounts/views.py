@@ -25,15 +25,18 @@ class Logout(APIView):
 class AccountAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            "username": user.username,
-            "email": user.email
-        })
+        try: 
+            (serializer.is_valid(raise_exception=True))
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            user = {
+                'token': token.key,
+                "username": user.username,
+                "email": user.email
+            }
+            return Response({"status": False, "message": "Logged in successfully", "user": user})
+        except:
+            return Response({"status": True, "message": "Invalid credentials provided"})
     
 class SignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -43,14 +46,14 @@ class SignUpView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         user = User.objects.filter(username=request.data['username'], email=request.data['email']).values()
         if len(user) > 0:
-            return Response({"error": True, "message": "You already have an account. Please Login"})
+            return Response({"status": True, "message": "You already have an account. Please Login"})
         username = User.objects.filter(username=request.data['username']).values()
         if len(username) > 0:
-            return Response({"error": True, "message": "Username is already taken"})
+            return Response({"status": True, "message": "Username is already taken"})
         new_user = User.objects.create_user(username=request.data['username'], email=request.data['email'])
         new_user.set_password(request.data['password'])
         new_user.save()
-        return Response({"error": False, "message": "Account created successfully"})
+        return Response({"status": False, "message": "Account created successfully"})
 
 class UsersListView(generics.ListAPIView):
     queryset = User.objects.all()
