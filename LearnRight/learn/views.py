@@ -58,7 +58,7 @@ class LearningCueListCreateView(generics.ListCreateAPIView):
         for field in fields:
             if field not in request.data.keys():
                 return Response({'error': True, 'message': f"{field.capitalize()} data is missing"})
-        cue = LearningCue.objects.filter(subject=request.data['subject'], topic=request.data['topic']).values()
+        cue = LearningCue.objects.filter(subject=request.data['subject'], topic=request.data['topic'], user__id=request.user.id).values()
         if len(cue) > 0:
             return Response({'error': True, 'message': f"Learning Cue with subject `{request.data['subject']}` and topic `{request.data['topic']}` already exist"})
         serializer = LearningCueSerializer(data={**request.data, "user": request.user.id} )
