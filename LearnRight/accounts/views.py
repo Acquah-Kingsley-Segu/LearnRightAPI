@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
 
@@ -36,7 +36,7 @@ class AccountAuthToken(ObtainAuthToken):
             }
             return Response({"status": False, "message": "Logged in successfully", "user": user})
         except:
-            return Response({"status": True, "message": "Invalid credentials provided"})
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
     
 class SignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
